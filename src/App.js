@@ -9,12 +9,24 @@ export default function App() {
   function handleDeleteItem(id) {
     setItems(items.filter((item) => item.id !== id));
   }
+
+  function togglePacked(id) {
+    setItems(
+      items.map((item) =>
+        id === item.id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
   return (
     <div className="app">
       <Logo />
       <Form onAddItems={handleAddItems} />
-      <PackingList items={items} onDeleteItem={handleDeleteItem} />
-      <Stats />
+      <PackingList
+        items={items}
+        onDeleteItem={handleDeleteItem}
+        onCompleteItem={togglePacked}
+      />
+      <Stats items={items} />
     </div>
   );
 }
@@ -56,20 +68,31 @@ const Form = ({ onAddItems }) => {
   );
 };
 
-const PackingList = ({ items, onDeleteItem }) => (
+const PackingList = ({ items, onDeleteItem, onCompleteItem }) => (
   <div className="list">
     <ul>
       {items.map((i) => (
-        <Item item={i} key={i.id} onDeleteItem={onDeleteItem} />
+        <Item
+          item={i}
+          key={i.id}
+          onDeleteItem={onDeleteItem}
+          onCompleteItem={onCompleteItem}
+        />
       ))}
     </ul>
   </div>
 );
 
-const Item = ({ item, onDeleteItem }) => {
+const Item = ({ item, onDeleteItem, onCompleteItem }) => {
   return (
     <li>
-      <input type="checkbox" />
+      <input
+        type="checkbox"
+        checked={item.packed}
+        onChange={() => {
+          onCompleteItem(item.id);
+        }}
+      />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
@@ -78,8 +101,12 @@ const Item = ({ item, onDeleteItem }) => {
   );
 };
 
-const Stats = () => (
+const Stats = ({ items }) => (
   <footer className="stats">
-    <em>🧳 You have X items on your list, and you already packed X%</em>
+    <em>
+      🧳 You have {items.length} items on your list, and you already packed{" "}
+      {((items.filter((i) => i.packed).length * 100) / items.length).toFixed(2)}
+      %
+    </em>
   </footer>
 );
