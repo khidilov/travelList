@@ -68,20 +68,46 @@ const Form = ({ onAddItems }) => {
   );
 };
 
-const PackingList = ({ items, onDeleteItem, onCompleteItem }) => (
-  <div className="list">
-    <ul>
-      {items.map((i) => (
-        <Item
-          item={i}
-          key={i.id}
-          onDeleteItem={onDeleteItem}
-          onCompleteItem={onCompleteItem}
-        />
-      ))}
-    </ul>
-  </div>
-);
+const PackingList = ({ items, onDeleteItem, onCompleteItem }) => {
+  const [sortBy, setSortBy] = useState("input");
+  const sortingFunctions = {
+    input: (a, b) => a.id - b.id,
+    alphabet: (a, b) =>
+      a.description.localeCompare(b.description) || a.id - b.id,
+    done: (a, b) => Number(a.packed) - Number(b.packed),
+  };
+  const sortedItems = [...items].sort(sortingFunctions[sortBy]);
+  console.log(items);
+  // let sortedItems;
+  // if (sortBy === "input") sortedItems = items;
+
+  // if (sortBy === "alphabet")
+  //   sortedItems = items.toSorted((a, b) =>
+  //     a.description.localeCompare(b.description)
+  //   );
+
+  // if (sortBy === "done")
+  //   sortedItems = items.toSorted((a, b) => Number(a.packed) - Number(b.packed));
+  return (
+    <div className="list">
+      <ul>
+        {sortedItems.map((i) => (
+          <Item
+            item={i}
+            key={i.id}
+            onDeleteItem={onDeleteItem}
+            onCompleteItem={onCompleteItem}
+          />
+        ))}
+      </ul>
+      <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+        <option value="input">Sort by input</option>
+        <option value="alphabet">Sort by alphabet</option>
+        <option value="done">Sort by completion</option>
+      </select>
+    </div>
+  );
+};
 
 const Item = ({ item, onDeleteItem, onCompleteItem }) => {
   return (
@@ -101,12 +127,25 @@ const Item = ({ item, onDeleteItem, onCompleteItem }) => {
   );
 };
 
-const Stats = ({ items }) => (
-  <footer className="stats">
-    <em>
-      🧳 You have {items.length} items on your list, and you already packed{" "}
-      {((items.filter((i) => i.packed).length * 100) / items.length).toFixed(2)}
-      %
-    </em>
-  </footer>
-);
+const Stats = ({ items }) => {
+  if (!items.length)
+    return (
+      <footer className="stats">
+        <em>Nothing in mind?</em>
+      </footer>
+    );
+
+  const total = items.length;
+  const completed = items.filter((i) => i.packed).length;
+  const percentage = Math.round((completed * 100) / total);
+  return (
+    <footer className="stats">
+      <em>
+        {percentage === 100
+          ? "Ready to go"
+          : `🧳 You have ${total} items on your list, and you already packed
+        ${completed} (${percentage}%)`}
+      </em>
+    </footer>
+  );
+};
