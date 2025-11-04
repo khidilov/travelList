@@ -17,6 +17,10 @@ export default function App() {
       )
     );
   }
+
+  function clearList() {
+    setItems([]);
+  }
   return (
     <div className="app">
       <Logo />
@@ -25,6 +29,7 @@ export default function App() {
         items={items}
         onDeleteItem={handleDeleteItem}
         onCompleteItem={togglePacked}
+        onClear={clearList}
       />
       <Stats items={items} />
     </div>
@@ -68,7 +73,7 @@ const Form = ({ onAddItems }) => {
   );
 };
 
-const PackingList = ({ items, onDeleteItem, onCompleteItem }) => {
+const PackingList = ({ items, onDeleteItem, onCompleteItem, onClear }) => {
   const [sortBy, setSortBy] = useState("input");
   const sortingFunctions = {
     input: (a, b) => a.id - b.id,
@@ -76,7 +81,10 @@ const PackingList = ({ items, onDeleteItem, onCompleteItem }) => {
       a.description.localeCompare(b.description) || a.id - b.id,
     done: (a, b) => Number(a.packed) - Number(b.packed),
   };
-  const sortedItems = [...items].sort(sortingFunctions[sortBy]);
+  let sortedItems = [...items].sort(sortingFunctions[sortBy]);
+  const clearUI = () => {
+    onClear([]);
+  };
   console.log(items);
   // let sortedItems;
   // if (sortBy === "input") sortedItems = items;
@@ -100,11 +108,14 @@ const PackingList = ({ items, onDeleteItem, onCompleteItem }) => {
           />
         ))}
       </ul>
-      <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-        <option value="input">Sort by input</option>
-        <option value="alphabet">Sort by alphabet</option>
-        <option value="done">Sort by completion</option>
-      </select>
+      <div className="action">
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="input">Sort by input</option>
+          <option value="alphabet">Sort by alphabet</option>
+          <option value="done">Sort by completion</option>
+        </select>
+        <button onClick={() => clearUI()}>Clear</button>
+      </div>
     </div>
   );
 };
@@ -131,7 +142,7 @@ const Stats = ({ items }) => {
   if (!items.length)
     return (
       <footer className="stats">
-        <em>Nothing in mind?</em>
+        <em>Nothing on mind?</em>
       </footer>
     );
 
