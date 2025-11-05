@@ -45,7 +45,13 @@ export const PackingList = ({
           <option value="alphabet">Sort by alphabet</option>
           <option value="done">Sort by completion</option>
         </select>
-        <button onClick={() => clearUI()}>Clear</button>
+        <button
+          onClick={() =>
+            window.confirm("Are you sure you want to clear items") && clearUI()
+          }
+        >
+          Clear
+        </button>
       </div>
     </div>
   );
